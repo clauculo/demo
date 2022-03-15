@@ -2,18 +2,18 @@
 
 namespace App\Entity;
 
-use App\Entity\User\CustomerGroup;
+use App\Entity\Traits\Relations\UserHasMany;
+use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Table(name="users")
+ * @ORM\Table(name="contacts")
  * @ORM\Entity()
  */
-class User
+class Contact
 {
     /**
      * @ORM\Column(type="integer", options={"unsigned"=true})
@@ -33,16 +33,12 @@ class User
     protected ?string $lastName = null;
 
     /**
-     * @var ArrayCollection<array-key, \App\Entity\Contact>
+     * @var User|null
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Contact", mappedBy="user", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\ManyToOne(targetEntity="App\Entity\User")
+     * @ORM\JoinColumn(nullable=true)
      */
-    protected Collection $contacts;
-
-    public function __construct()
-    {
-        $this->contacts = new ArrayCollection();
-    }
+    protected $user;
 
     public function getId(): ?int
     {
@@ -77,18 +73,12 @@ class User
         return $this;
     }
 
-    public function addContact(Contact $contact): self
+    /**
+     * @return $this
+     */
+    public function setUser(?User $user)
     {
-        if (!$this->contacts->contains($contact))
-        {
-            $contact->setUser($this);
-            $this->contacts->add($contact);
-        }
+        $this->user = $user;
         return $this;
-    }
-
-    public function getContacts(): PersistentCollection
-    {
-        return $this->contacts;
     }
 }

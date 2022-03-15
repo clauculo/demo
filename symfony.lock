@@ -80,6 +80,9 @@
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
+    "league/fractal": {
+        "version": "0.20"
+    },
     "psr/cache": {
         "version": "3.0.0"
     },

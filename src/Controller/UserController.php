@@ -11,34 +11,30 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use \PDO;
 
 class UserController
 {
     #[Route(path: '/api/v1/users/{id}', name: 'users.get', methods: ['GET'])]
-    public function getUser($id, EntityManagerInterface $em)
+    public function getUser($id)
     {
-        /** @var User $user */
-        $user = $em->getRepository(User::class)->find($id);
+        try {
+            $dbh = new PDO('sqlite:../var/app.db');
+            foreach($dbh->query('SELECT * FROM `users` WHERE id = ' . $id) as $row) {
+                $arrData = $row;
+            }
+            $dbh = null;
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage() . "<br/>";
+            die();
+        }
 
         $arr_data = array (
-            'id' => $user->getId(),
-            'first_name' => $user->getFirstName(),
+            'id' => $arrData['id'],
+            'first_name' => $arrData['firstname'],
             'account' => 'basic'
         );
 
         return new JsonResponse($arr_data, 200);
-    }
-
-
-
-    #[Route(path: '/api/v1/users', name: 'users.create', methods: ['POST'])]
-    public function createUser(EntityManagerInterface $em)
-    {
-        $user = new User();
-        $user->setFirstName('Wouter');
-        $em->persist($user);
-        $em->flush();
-
-        return new Response(json_encode($user), 200);
     }
 }
